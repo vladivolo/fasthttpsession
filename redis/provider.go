@@ -1,10 +1,10 @@
 package redis
 
 import (
-	"github.com/phachon/fasthttpsession"
 	"errors"
-	"reflect"
 	"github.com/gomodule/redigo/redis"
+	"github.com/vladivolo/fasthttpsession"
+	"reflect"
 )
 
 // session redis provider
@@ -13,21 +13,21 @@ const ProviderName = "redis"
 
 var (
 	provider = NewProvider()
-	encrypt = fasthttpsession.NewEncrypt()
+	encrypt  = fasthttpsession.NewEncrypt()
 )
 
 type Provider struct {
-	config *Config
-	values *fasthttpsession.CCMap
-	redisPool *redis.Pool
+	config      *Config
+	values      *fasthttpsession.CCMap
+	redisPool   *redis.Pool
 	maxLifeTime int64
 }
 
 // new redis provider
 func NewProvider() *Provider {
 	return &Provider{
-		config: &Config{},
-		values: fasthttpsession.NewDefaultCCMap(),
+		config:    &Config{},
+		values:    fasthttpsession.NewDefaultCCMap(),
 		redisPool: &redis.Pool{},
 	}
 }
@@ -43,11 +43,8 @@ func (rp *Provider) Init(lifeTime int64, redisConfig fasthttpsession.ProviderCon
 	rp.maxLifeTime = lifeTime
 
 	// config check
-	if rp.config.Host == "" {
-		return errors.New("session redis provider init error, config Host not empty")
-	}
-	if rp.config.Port == 0 {
-		return errors.New("session redis provider init error, config Port not empty")
+	if rp.config.Addr == "" {
+		return errors.New("session redis provider init error, config Addr(Host:Port) not empty")
 	}
 	if rp.config.MaxIdle <= 0 {
 		return errors.New("session redis provider init error, config MaxIdle must be more than 0")
@@ -70,7 +67,7 @@ func (rp *Provider) Init(lifeTime int64, redisConfig fasthttpsession.ProviderCon
 	defer conn.Close()
 	_, err := conn.Do("PING")
 	if err != nil {
-		return errors.New("session redis provider init error, "+err.Error())
+		return errors.New("session redis provider init error, " + err.Error())
 	}
 	return nil
 }
@@ -82,7 +79,6 @@ func (rp *Provider) NeedGC() bool {
 
 // session redis provider not need garbage collection
 func (rp *Provider) GC() {}
-
 
 // read session store by session id
 func (rp *Provider) ReadStore(sessionId string) (fasthttpsession.SessionStore, error) {
@@ -153,10 +149,10 @@ func (rp *Provider) Count() int {
 
 // get redis session key, prefix:sessionId
 func (rp *Provider) getRedisSessionKey(sessionId string) string {
-	return rp.config.KeyPrefix+":"+sessionId
+	return rp.config.KeyPrefix + ":" + sessionId
 }
 
 // register session provider
-func init()  {
+func init() {
 	fasthttpsession.Register(ProviderName, provider)
 }

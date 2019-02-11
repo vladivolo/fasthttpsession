@@ -1,20 +1,17 @@
 package redis
 
 import (
-	"time"
 	"github.com/gomodule/redigo/redis"
-	"fmt"
+	"time"
 )
 
 func newRedisPool(config *Config) *redis.Pool {
 
-	server := fmt.Sprintf("%s:%d", config.Host, config.Port)
-
 	return &redis.Pool{
-		MaxIdle: config.MaxIdle,
+		MaxIdle:     config.MaxIdle,
 		IdleTimeout: time.Duration(config.IdleTimeout) * time.Second,
-		Dial: func () (redis.Conn, error) {
-			c, err := redis.Dial("tcp", server)
+		Dial: func() (redis.Conn, error) {
+			c, err := redis.Dial("tcp", config.Addr)
 			if err != nil {
 				return nil, err
 			}
@@ -39,4 +36,3 @@ func newRedisPool(config *Config) *redis.Pool {
 		},
 	}
 }
-

@@ -2,13 +2,15 @@ package redis
 
 // session redis config
 
+import (
+	"errors"
+	"strings"
+)
+
 type Config struct {
 
-	// Redis server host
-	Host string
-
-	// Redis server port
-	Port int64
+	// Addr=Host:Port
+	Addr string
 
 	// Maximum number of idle connections in the redis server pool.
 	MaxIdle int
@@ -37,4 +39,18 @@ type Config struct {
 
 func (mc *Config) Name() string {
 	return ProviderName
+}
+
+//tcp@127.0.0.1:6379/1/
+func ParceRedisAddr(Params string) (proto, ipaddr, db string, err error) {
+	arr := strings.Split(Params, "@")
+	if len(arr) != 2 {
+		return "", "", "", errors.New("Failed full redis queue format")
+	}
+	in := strings.Split(arr[1], "/")
+	if len(in) != 3 {
+		return "", "", "", errors.New("Failed full redis queue format")
+	}
+
+	return arr[0], in[0], in[1], nil
 }
